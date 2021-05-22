@@ -28,12 +28,14 @@ db = SQLAlchemy(app)
 # TODO: connect to a local postgresql database
 # Modified config.py
 
-
+print('before models')
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
 from models import *
+print('after models')
 migrate = Migrate(app, db)
+print('after migrate')
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 # Changed tables so that they are all small letters
@@ -93,19 +95,35 @@ def venues():
   }]
   return render_template('pages/venues.html', areas=data);
 
-@app.route('/venues/search', methods=['POST','GET'])
+@app.route('/venues/search', methods=['POST'])
 def search_venues():
+  print('in search')
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
+  # search_term = request.form.get('search_term', '')
+  # print(search_term)
+  # result = Venue.query.filter(Venue.name.ilike(f'%{search_term}%'))
+  # print ('And the result is . . .')
+  # print(result)
+  # response={
+  #   "count": result.count(),
+  #   "data": result
+  # }
   search_term = request.form.get('search_term', '')
-  result = Venue.query.filter(Venue.name.ilike(f'%{search_term}%'))
-  print ('And the result is . . .')
-  print(result)
-  response={
-    "count": result.count(),
-    "data": result
+  print(search_term)
+  venues = Venue.query.filter(Venue.name.ilike("%" + search_term + "%")).all()
+  print(len(venues))
+  response = {
+      "count": len(venues),
+      "data": []
   }
+  for venue in venues:
+      print(venue.id)
+      response["data"].append({
+          'id': venue.id,
+          'name': venue.name,
+      })
   
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 

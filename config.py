@@ -1,5 +1,5 @@
 import os
-from info import username,password
+
 SECRET_KEY = os.urandom(32)
 # Grabs the folder where the script runs.
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -8,5 +8,5 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 DEBUG = True
 
 # Connect to the database
-SQLALCHEMY_DATABASE_URI = f"postgresql://{username}:{password}@localhost:5432/fyyur"
+SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/fyyur"
 SQLALCHEMY_TRACK_MODIFICATIONS = False
