@@ -36,6 +36,9 @@ from models import *
 migrate = Migrate(app, db)
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+# Changed tables so that they are all small letters
+# flask db migrate
+# flask db upgrade
 # 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -90,19 +93,20 @@ def venues():
   }]
   return render_template('pages/venues.html', areas=data);
 
-@app.route('/venues/search', methods=['POST'])
+@app.route('/venues/search', methods=['POST','GET'])
 def search_venues():
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
+  search_term = request.form.get('search_term', '')
+  result = Venue.query.filter(Venue.name.ilike(f'%{search_term}%'))
+  print ('And the result is . . .')
+  print(result)
   response={
-    "count": 1,
-    "data": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
+    "count": result.count(),
+    "data": result
   }
+  
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/venues/<int:venue_id>')
