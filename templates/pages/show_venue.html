@@ -77,13 +77,40 @@
 
 <section class="row">
 	<div class="col-md-3">
-		<a class="btn btn-warning" href="/venues/{{venue.id}}/edit">Edit venue</a>
+		<a class="btn btn-warning" onclick="editVenue({{venue.id}})">Edit venue</a>
 	</div>
 	<div class="col-md-3">
 		<button class="btn btn-danger" onclick="deleteVenue({{venue.id}})">Delete venue</button>
 	</div>
 </section><br><br><br>
 
+
+<script>
+	function editVenue(venueId) {
+		console.log(venueId)
+		fetch('/venues/' + venueId + '/edit', {
+		  method: 'GET'
+		})
+		.then(function() {
+			window.location = '/venues/' + venueId + '/edit';
+		})
+		.catch(function (e) {
+			console.log('Error when editing Venue --> ', e)
+		})
+	  }
+
+	function deleteVenue(venueId) {
+		fetch('/venues/' + venueId, {
+		  method: 'DELETE'
+		})
+		.then(function() {
+			window.location = `/venues`;
+		})
+		.catch(function (e) {
+			console.log('Error when deleting Venue --> ', e)
+		})
+	  }
+</script>
 
 {% endblock %}
 
