@@ -175,7 +175,7 @@ def upcoming_shows(shows):
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
-  # TODO: replace with real venue data from the venues table, using venue_id
+  # TODO:Done replace with real venue data from the venues table, using venue_id
   # data1={
   #   "id": 1,
   #   "name": "The Musical Hop",
@@ -267,7 +267,7 @@ def show_venue(venue_id):
     "city": venue.city,
     "state": venue.state,
     "phone": venue.phone,
-    "website_link": venue.website_link,
+    "website": venue.website,
     "facebook_link": venue.facebook_link,
     "seeking_talent": venue.seeking_talent,
     "seeking_description": venue.seeking_description,
@@ -291,29 +291,30 @@ def create_venue_form():
 def create_venue_submission():
   # TODO:Done insert form data as a new Venue record in the db, instead
   # TODO:Done modify data to be the data object returned from db insertion
+  form = VenueForm(request.form)
+
   try:
-    # get all attributes for venue from client request
-    form = VenueForm()
-    name = request.form['name']
-    city = request.form['city']
-    state = request.form['state']
-    address = request.form['address']
-    phone = request.form['phone']
-    genres = request.form['genres']
-    facebook_link = request.form['facebook_link']
-    website_link = request.form['website_link']
-    image_link = request.form['image_link']
+    # get all of the data
+    name = form.name.data
+    city = form.city.data
+    state = form.state.data
+    address = form.address.data
+    phone = form.phone.data
+    genres = form.genres.data
+    facebook_link = form.facebook_link.data
+    website = form.website.data
+    image_link = form.image_link.data
 
     seeking_talent = False
     if 'seeking_talent' in request.form:
       seeking_talent = True
 
-    seeking_description = request.form['seeking_description']
-
+    seeking_description = form.seeking_description.data
+    print(name)
     # define venue from entered data and add it to db
     venue = Venue(name=name, city=city, state=state, address=address,
                   phone=phone, genres=genres, facebook_link=facebook_link,
-                  website_link=website_link, image_link=image_link,
+                  website=website, image_link=image_link,
                   seeking_talent=seeking_talent,
                   seeking_description=seeking_description)
     db.session.add(venue)
@@ -336,16 +337,20 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-  # TODO: Complete this endpoint for taking a venue_id, and using
+  # TODO:Done Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
   try:
-    Venue.query.filter_by(id=venue_id).delete()
-    db.session.commit()
-  except Exception as e:
-    print(e)
+     venue = Venue.query.get(venue_id)
+     db.session.delete(venue)
+     db.session.commit()
+     flash('The Venue has been successfully deleted!')
+     return render_template('pages/home.html')
+  except:
     db.session.rollback()
+    flash('Delete was unsuccessful. Try again!')
   finally:
     db.session.close()
+
 
   # BONUS CHALLENGE: Done Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
@@ -493,9 +498,10 @@ def edit_artist_submission(artist_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
-  form = VenueForm()
+
 
   venue = Venue.query.filter_by(id=venue_id).first()
+  form = VenueForm(obj=venue)
 
   # venue={
   #   "id": 1,
@@ -520,7 +526,7 @@ def edit_venue(venue_id):
     "city": venue.city,
     "state": venue.state,
     "phone": venue.phone,
-    "website_link": venue.website_link,
+    "website": venue.website,
     "facebook_link": venue.facebook_link,
     "seeking_talent": venue.seeking_talent,
     "seeking_description": venue.seeking_description,
@@ -530,29 +536,34 @@ def edit_venue(venue_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
-  # TODO: take values from the form submitted, and update existing
+  # TODO:Done take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
-  try:
-    # get all attributes for venue from client request
-    form = VenueForm()
-    venue = Venue.query.filter_by(id=venue_id).first()
+  form = VenueForm(request.form)  
 
-    venue.name = request.form['name']
-    venue.city = request.form['city']
-    venue.state = request.form['state']
-    venue.address = request.form['address']
-    venue.phone = request.form['phone']
-    venue.genres = request.form['genres']
-    venue.facebook_link = request.form['facebook_link']
-    venue.website_link = request.form['website_link']
-    venue.image_link = request.form['image_link']
+  try:
+    venue = Venue.query.filter_by(id=venue_id).first()
+    # get all of the data
+    venue.name = form.name.data
+    venue.city = form.city.data
+    venue.tate = form.state.data
+    venue.address = form.address.data
+    venue.phone = form.phone.data
+    venue.genres = form.genres.data
+    venue.facebook_link = form.facebook_link.data
+    venue.website = form.website.data
+    venue.image_link = form.image_link.data
 
     venue.seeking_talent = False
     if 'seeking_talent' in request.form:
       venue.seeking_talent = True
 
-    venue.seeking_description = request.form['seeking_description']
-
+    venue.seeking_description = form.seeking_description.data
+    # define venue from entered data and add it to db
+    venue = Venue(name=venue.name, city=venue.city, state=venue.state, address=venue.address,
+                  phone=venue.phone, genres=venue.genres, facebook_link=venue.facebook_link,
+                  website=venue.website, image_link=venue.image_link,
+                  seeking_talent=venue.seeking_talent,
+                  seeking_description=venue.seeking_description)
     db.session.commit()
 
     # TODO:Done on successful db insert, flash success

@@ -110,14 +110,15 @@ class VenueForm(Form):
             ('Reggae', 'Reggae'),
             ('Rock n Roll', 'Rock n Roll'),
             ('Soul', 'Soul'),
+            ('Swing','Swing'),
             ('Other', 'Other'),
         ]
     )
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
     )
-    website_link = StringField(
-        'website_link'
+    website = StringField(
+        'website'
     )
 
     seeking_talent = BooleanField( 'seeking_talent' )
@@ -219,6 +220,7 @@ class ArtistForm(Form):
             ('Reggae', 'Reggae'),
             ('Rock n Roll', 'Rock n Roll'),
             ('Soul', 'Soul'),
+            ('Swing','Swing'),
             ('Other', 'Other'),
         ]
      )
@@ -227,8 +229,8 @@ class ArtistForm(Form):
         'facebook_link', validators=[URL()]
      )
 
-    website_link = StringField(
-        'website_link'
+    website = StringField(
+        'website'
      )
 
     seeking_venue = BooleanField( 'seeking_venue' )
