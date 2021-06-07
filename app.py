@@ -253,7 +253,6 @@ def show_venue(venue_id):
   #   "past_shows_count": 1,
   #   "upcoming_shows_count": 1,
   # }
-
   venue = Venue.query.filter_by(id=venue_id).first()
   shows = Show.query.filter_by(venue_id=venue_id).all()
   venue_past_shows = past_shows(shows)

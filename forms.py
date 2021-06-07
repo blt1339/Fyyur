@@ -1,8 +1,21 @@
+import re
 from datetime import datetime
 from flask_wtf import Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms.validators import DataRequired, AnyOf, URL, Regexp, Length
 
+
+def isValidPhone(form, field):
+    if not re.search(r"^[0-9]{3}-[0-9]{3}-[0-9]{4}$", field.data) and field.data > 10:
+	    raise ValidationError("Invalid phone number.")
+
+def isValidPhoneState(form, field):
+    try:
+        input_number = phonenumbers.parse(field.data, 'US')
+        if not phonenumbers.is_possible_number(input_number):
+            raise ValidationError('Invalid phone number.')
+    except Exception as e:
+        raise ValidationError(e.args)
 class ShowForm(Form):
     artist_id = StringField(
         'artist_id'
@@ -83,7 +96,7 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone'
+        'phone',validators=[isValidPhone, isValidPhoneState, Length(min=10, max=18)]
     )
     image_link = StringField(
         'image_link'
@@ -195,9 +208,10 @@ class ArtistForm(Form):
             ('WY', 'WY'),
         ]
     )
+    
     phone = StringField(
-        # TODO implement validation logic for state
-        'phone'
+        # TODO implement validation logic for state        
+        'phone', validators=[isValidPhone, isValidPhoneState, Length(min=10, max=18)]
     )
 
     image_link = StringField(
