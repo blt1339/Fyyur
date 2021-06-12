@@ -7,8 +7,11 @@ from wtforms.validators import DataRequired, AnyOf, URL, Regexp, Length, Validat
 
 
 def isValidPhone(form, field):
-    if not re.search(r"^[0-9]{3}-[0-9]{3}-[0-9]{4}$", field.data) and field.data > 10:
-	    raise ValidationError("Invalid phone number.")
+    print('in isValidPhone')
+    print('-----------------------------')
+    print(field.data)
+    if not re.search(r'^[0-9\-\+]+$', field.data):
+        raise ValidationError("Invalid phone number.")
 
 def isValidPhoneState(form, field):
     try:
@@ -122,7 +125,7 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone',validators=[isValidPhone, isValidPhoneState, Length(min=10, max=18)]
+        'phone',validators=[isValidPhone, Length(min=10, max=18)]
     )
     image_link = StringField(
         'image_link'

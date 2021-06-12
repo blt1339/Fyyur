@@ -310,17 +310,18 @@ def create_venue_submission():
 
     seeking_description = form.seeking_description.data
     print(name)
-    # define venue from entered data and add it to db
-    venue = Venue(name=name, city=city, state=state, address=address,
+    if form.validate():
+      # define venue from entered data and add it to db
+      venue = Venue(name=name, city=city, state=state, address=address,
                   phone=phone, genres=genres, facebook_link=facebook_link,
                   website=website, image_link=image_link,
                   seeking_talent=seeking_talent,
                   seeking_description=seeking_description)
-    db.session.add(venue)
-    db.session.commit()
+      db.session.add(venue)
+      db.session.commit()
 
-    # TODO:Done on successful db insert, flash success
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+      # TODO:Done on successful db insert, flash success
+      flash('Venue ' + request.form['name'] + ' was successfully listed!')
   except:
     # TODO:Done on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
