@@ -559,7 +559,7 @@ def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
 
-  form = ArtistForm(request.form)  
+  form = ArtistForm(request.form, meta={"csrf": False})  
 
   try:
     artist = Artist.query.filter_by(id=artist_id).first()
@@ -578,16 +578,23 @@ def edit_artist_submission(artist_id):
       artist.seeking_venue = True
 
     artist.seeking_description = form.seeking_description.data
-    # define venue from entered data and add it to db
-    artist = Artist(name=artist.name, city=artist.city, state=artist.state, 
-                  phone=artist.phone, genres=artist.genres, facebook_link=artist.facebook_link,
-                  website=artist.website, image_link=artist.image_link,
-                  seeking_venue=artist.seeking_venue,
-                  seeking_description=artist.seeking_description)
-    db.session.commit()
 
-    # TODO:Done on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + ' was successfully updated!')
+    if form.validate():
+      # define venue from entered data and add it to db
+      artist = Artist(name=artist.name, city=artist.city, state=artist.state, 
+                   phone=artist.phone, genres=artist.genres, facebook_link=artist.facebook_link,
+                   website=artist.website, image_link=artist.image_link,
+                   seeking_venue=artist.seeking_venue,
+                   seeking_description=artist.seeking_description)
+      db.session.commit()
+
+      # TODO:Done on successful db insert, flash success
+      flash('Artist ' + request.form['name'] + ' was successfully updated!')
+    else:
+      flash('An error occurred. Artist ' + request.form['name'] + ' could not be updated.')
+      flash_errors(form)
+
+
   except:
     # TODO:Done on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
@@ -641,7 +648,7 @@ def edit_venue(venue_id):
 def edit_venue_submission(venue_id):
   # TODO:Done take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
-  form = VenueForm(request.form)  
+  form = VenueForm(request.form, meta={"csrf": False})  
 
   try:
     venue = Venue.query.filter_by(id=venue_id).first()
@@ -661,16 +668,22 @@ def edit_venue_submission(venue_id):
       venue.seeking_talent = True
 
     venue.seeking_description = form.seeking_description.data
+    if form.validate():
     # define venue from entered data and add it to db
-    venue = Venue(name=venue.name, city=venue.city, state=venue.state, address=venue.address,
-                  phone=venue.phone, genres=venue.genres, facebook_link=venue.facebook_link,
-                  website=venue.website, image_link=venue.image_link,
-                  seeking_talent=venue.seeking_talent,
-                  seeking_description=venue.seeking_description)
-    db.session.commit()
+      venue = Venue(name=venue.name, city=venue.city, state=venue.state, address=venue.address,
+                    phone=venue.phone, genres=venue.genres, facebook_link=venue.facebook_link,
+                    website=venue.website, image_link=venue.image_link,
+                    seeking_talent=venue.seeking_talent,
+                    seeking_description=venue.seeking_description)
+      db.session.commit()
 
-    # TODO:Done on successful db insert, flash success
-    flash('Venue ' + request.form['name'] + ' was successfully updated!')
+      # TODO:Done on successful db insert, flash success
+      flash('Venue ' + request.form['name'] + ' was successfully updated!')
+
+    else:
+      flash('An error occurred. Venue ' + request.form['name'] + ' could not be updated.')   
+      flash_errors(form)
+
   except:
     # TODO:Done on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
