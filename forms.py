@@ -3,7 +3,7 @@ import phonenumbers
 from datetime import datetime
 from flask_wtf import Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL, Regexp, Length, ValidationError
+from wtforms.validators import DataRequired, Optional, AnyOf, URL, Regexp, Length, ValidationError
 
 
 def isValidPhone(form, field):
@@ -14,10 +14,11 @@ def isValidPhone(form, field):
         raise ValidationError("Invalid phone number.")
 
 def isValidPhoneState(form, field):
+    print('in is valid phone state')
     try:
         input_number = phonenumbers.parse(field.data, 'US')
         if not phonenumbers.is_possible_number(input_number):
-            raise ValidationError('Invalid phone number.')
+            raise ValidationError('Invalid phone number not a US phone.')
     except Exception as e:
         raise ValidationError(e.args)
 
@@ -125,7 +126,7 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone', validators=[DataRequired(), Regexp("^[0-9]*$", message="Phone number should only contain digits")]
+        'phone', validators=[DataRequired(), isValidPhoneState, isValidPhone]
     )
     image_link = StringField(
         'image_link'
@@ -137,12 +138,13 @@ class VenueForm(Form):
     )
     
     facebook_link = StringField(
-        'facebook_link'
+        'facebook_link', validators=[Optional(), Regexp('(?:(?:http|https):\/\/)?(?:www.)?facebook.com\/(?:(?:\w)*#!\/)?(?:pages\/)?(?:[?\w\-]*\/)?(?:profile.php\?id=(?=\d.*))?([\w\-]*)?', message="The format for the facebook link was not correct")]
     )
+
 
     
     website = StringField(
-        'website'
+        'website', validators=[Optional(),URL()]
     )
 
     seeking_talent = BooleanField( 'seeking_talent' )
@@ -164,10 +166,14 @@ class ArtistForm(Form):
         'state', validators=[DataRequired()],
         choices=state_choices
     )
+    # phone = StringField(
+    #     # TODO implement validation logic for state 
+    #     'phone', validators=[DataRequired(), Regexp("^[0-9]*$", message="Phone number should only contain digits")]
+    # ) 
     phone = StringField(
-        # TODO implement validation logic for state 
-        'phone', validators=[DataRequired(), Regexp("^[0-9]*$", message="Phone number should only contain digits")]
-    ) 
+        # TODO:Done implement validation logic for state 
+        'phone', validators=[DataRequired(), isValidPhoneState, isValidPhone]
+    )
 
     image_link = StringField(
         'image_link'
@@ -176,17 +182,13 @@ class ArtistForm(Form):
         'genres', validators=[DataRequired()],
         choices=genres_choices
      )
-    # facebook_link = StringField(
-    #     # TODO implement enum restriction
-    #     'facebook_link'
-    #  )
     facebook_link = StringField(
-        'facebook_link', validators=[DataRequired(), Regexp('(?:(?:http|https):\/\/)?(?:www.)?facebook.com\/(?:(?:\w)*#!\/)?(?:pages\/)?(?:[?\w\-]*\/)?(?:profile.php\?id=(?=\d.*))?([\w\-]*)?', message="The correct format for the facebook link was not correct")]
+        # TODO: Done implement enum restriction        
+        'facebook_link', validators=[Optional(), Regexp('(?:(?:http|https):\/\/)?(?:www.)?facebook.com\/(?:(?:\w)*#!\/)?(?:pages\/)?(?:[?\w\-]*\/)?(?:profile.php\?id=(?=\d.*))?([\w\-]*)?', message="The format for the facebook link was not correct")]
     )
-
     website = StringField(
-        'website_link'
-     )
+        'website', validators=[Optional(),URL()]
+    )
 
     seeking_venue = BooleanField( 'seeking_venue' )
 
