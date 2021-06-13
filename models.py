@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -18,8 +19,7 @@ class Venue(db.Model):
     website = db.Column(db.String(500))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String)
-    shows = db.relationship('Show', backref="venue", lazy=True)    
-
+    shows = db.relationship('Show', backref=db.backref("venue"), lazy="joined")
 
     def __repr__(self):
         return f'<Venue {self.id} {self.name}>'
@@ -39,7 +39,7 @@ class Artist(db.Model):
     website = db.Column(db.String(500))
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String)
-    shows = db.relationship('Show', backref="artist", lazy=True)
+    shows = db.relationship('Show', backref=db.backref('artist'), lazy="joined")
 
     def __repr__(self):
         return '<Artist {}>'.format(self.name)
