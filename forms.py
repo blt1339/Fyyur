@@ -7,14 +7,10 @@ from wtforms.validators import DataRequired, Optional, AnyOf, URL, Regexp, Lengt
 
 
 def isValidPhone(form, field):
-    print('in isValidPhone')
-    print('-----------------------------')
-    print(field.data)
     if not re.search(r'^[0-9\-\+]+$', field.data):
         raise ValidationError("Invalid phone number.")
 
 def isValidPhoneState(form, field):
-    print('in is valid phone state')
     try:
         input_number = phonenumbers.parse(field.data, 'US')
         if not phonenumbers.is_possible_number(input_number):
