@@ -38,8 +38,38 @@ migrate = Migrate(app, db)
 # flask db upgrade
 # 
 #----------------------------------------------------------------------------#
-# Filters.
+# Functions
 #----------------------------------------------------------------------------#
+
+def past_shows(shows):
+  past_shows_info = []
+
+  for show in shows:
+    if show.start_time <= datetime.now():
+      show_artist = Artist.query.filter_by(id=show.artist_id).first()
+      past_shows_info.append({
+        "aritist_id": show.artist_id,
+        "artist_name": show_artist.name,
+        "artist_image_link": show_artist.name,
+        "start_time":show.start_time.strftime("%Y-%m-%d %H:%M:%S") 
+      })
+      
+  return past_shows_info
+
+def upcoming_shows(shows):
+  upcoming_shows_info = []
+
+  for show in shows:
+    if show.start_time > datetime.now():
+      show_artist = Artist.query.filter_by(id=show.artist_id).first()
+      upcoming_shows_info.append({
+        "aritist_id": show.artist_id,
+        "artist_name": show_artist.name,
+        "artist_image_link": show_artist.name,
+        "start_time":show.start_time.strftime("%Y-%m-%d %H:%M:%S") 
+      })
+      
+  return upcoming_shows_info
 
 def format_datetime(value, format='medium'):
   date = dateutil.parser.parse(value)
@@ -50,6 +80,13 @@ def format_datetime(value, format='medium'):
   return babel.dates.format_datetime(date, format, locale='en')
 
 app.jinja_env.filters['datetime'] = format_datetime
+ 
+def flash_errors(form):
+  """Flashes form errors"""
+  for field, errors in form.errors.items():
+    for error in errors:
+      flash(u"Error in the %s field - %s" % (
+        getattr(form, field).label.text,error), 'error')
 
 #----------------------------------------------------------------------------#
 # Controllers.
@@ -142,35 +179,6 @@ def search_venues():
   # Return the result of the search
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
-def past_shows(shows):
-  past_shows_info = []
-
-  for show in shows:
-    if show.start_time <= datetime.now():
-      show_artist = Artist.query.filter_by(id=show.artist_id).first()
-      past_shows_info.append({
-        "aritist_id": show.artist_id,
-        "artist_name": show_artist.name,
-        "artist_image_link": show_artist.name,
-        "start_time":show.start_time.strftime("%Y-%m-%d %H:%M:%S") 
-      })
-      
-  return past_shows_info
-
-def upcoming_shows(shows):
-  upcoming_shows_info = []
-
-  for show in shows:
-    if show.start_time > datetime.now():
-      show_artist = Artist.query.filter_by(id=show.artist_id).first()
-      upcoming_shows_info.append({
-        "aritist_id": show.artist_id,
-        "artist_name": show_artist.name,
-        "artist_image_link": show_artist.name,
-        "start_time":show.start_time.strftime("%Y-%m-%d %H:%M:%S") 
-      })
-      
-  return upcoming_shows_info
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
@@ -290,7 +298,7 @@ def create_venue_form():
 def create_venue_submission():
   # TODO:Done insert form data as a new Venue record in the db, instead
   # TODO:Done modify data to be the data object returned from db insertion
-  form = VenueForm(request.form)
+  form = VenueForm(request.form, meta={"csrf": False})
 
   try:
     # get all of the data
@@ -309,7 +317,7 @@ def create_venue_submission():
       seeking_talent = True
 
     seeking_description = form.seeking_description.data
-    print(name)
+
     if form.validate():
       # define venue from entered data and add it to db
       venue = Venue(name=name, city=city, state=state, address=address,
@@ -322,6 +330,10 @@ def create_venue_submission():
 
       # TODO:Done on successful db insert, flash success
       flash('Venue ' + request.form['name'] + ' was successfully listed!')
+    else:
+      flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')     
+      flash_errors(form)
+
   except:
     # TODO:Done on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
@@ -683,7 +695,7 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: Done insert form data as a new Venue record in the db, instead
   # TODO: Done modify data to be the data object returned from db insertion
-  form = ArtistForm(request.form)
+  form = ArtistForm(request.form, meta={"csrf": False})
 
   try:
     # get all of the data
@@ -702,17 +714,20 @@ def create_artist_submission():
 
     seeking_description = form.seeking_description.data
 
-    # define artist from entered data and add it to db
-    artist = Artist(name=name, city=city, state=state,
-                  phone=phone, genres=genres, facebook_link=facebook_link,
-                  website=website, image_link=image_link,
-                  seeking_venue=seeking_venue,
-                  seeking_description=seeking_description)
-    db.session.add(artist)
-    db.session.commit()
-
-    # TODO:Done on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
+    if form.validate():
+      # define artist from entered data and add it to db
+      artist = Artist(name=name, city=city, state=state,
+                    phone=phone, genres=genres, facebook_link=facebook_link,
+                    website=website, image_link=image_link,
+                    seeking_venue=seeking_venue,
+                    seeking_description=seeking_description)
+      db.session.add(artist)
+      db.session.commit()
+      # TODO:Done on successful db insert, flash success
+      flash('Artist ' + request.form['name'] + ' was successfully listed!')      
+    else:
+      flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed.')     
+      flash_errors(form)
   except:
     # TODO:Done on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')

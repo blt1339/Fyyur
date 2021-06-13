@@ -125,7 +125,7 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone',validators=[isValidPhone, Length(min=10, max=18)]
+        'phone', validators=[DataRequired(), Regexp("^[0-9]*$", message="Phone number should only contain digits")]
     )
     image_link = StringField(
         'image_link'
@@ -137,7 +137,7 @@ class VenueForm(Form):
     )
     
     facebook_link = StringField(
-        'facebook_link', validators=[URL()]
+        'facebook_link'
     )
 
     
@@ -164,11 +164,10 @@ class ArtistForm(Form):
         'state', validators=[DataRequired()],
         choices=state_choices
     )
-    
     phone = StringField(
-        # TODO implement validation logic for state        
-        'phone', validators=[isValidPhone, isValidPhoneState, Length(min=10, max=18)]
-    )
+        # TODO implement validation logic for state 
+        'phone', validators=[DataRequired(), Regexp("^[0-9]*$", message="Phone number should only contain digits")]
+    ) 
 
     image_link = StringField(
         'image_link'
@@ -177,10 +176,13 @@ class ArtistForm(Form):
         'genres', validators=[DataRequired()],
         choices=genres_choices
      )
+    # facebook_link = StringField(
+    #     # TODO implement enum restriction
+    #     'facebook_link'
+    #  )
     facebook_link = StringField(
-        # TODO implement enum restriction
-        'facebook_link', validators=[URL()]
-     )
+        'facebook_link', validators=[DataRequired(), Regexp('(?:(?:http|https):\/\/)?(?:www.)?facebook.com\/(?:(?:\w)*#!\/)?(?:pages\/)?(?:[?\w\-]*\/)?(?:profile.php\?id=(?=\d.*))?([\w\-]*)?', message="The correct format for the facebook link was not correct")]
+    )
 
     website = StringField(
         'website_link'
