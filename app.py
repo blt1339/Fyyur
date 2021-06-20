@@ -58,8 +58,11 @@ def past_shows(shows):
       show_artist = Artist.query.filter_by(id=show.artist_id).first()
       past_shows_info.append({
         "aritist_id": show.artist_id,
-        "artist_name": show_artist.name,
-        "artist_image_link": show_artist.name,
+        "artist_name": show.artist.name,
+        "artist_image_link": show.artist.image_link,
+        "venue_id":show.venue_id,
+        "venue_name":show.venue.name,
+        "venue_image_link":show.venue.image_link,
         "start_time":show.start_time.strftime("%Y-%m-%d %H:%M:%S") 
       })
       
@@ -73,8 +76,11 @@ def upcoming_shows(shows):
       show_artist = Artist.query.filter_by(id=show.artist_id).first()
       upcoming_shows_info.append({
         "aritist_id": show.artist_id,
-        "artist_name": show_artist.name,
-        "artist_image_link": show_artist.name,
+        "artist_name": show.artist.name,
+        "artist_image_link": show.artist.image_link,
+        "venue_id":show.venue_id,
+        "venue_name":show.venue.name,
+        "venue_image_link":show.venue.image_link,        
         "start_time":show.start_time.strftime("%Y-%m-%d %H:%M:%S") 
       })
       
@@ -549,46 +555,25 @@ def create_artist_submission():
 #  ----------------------------------------------------------------
 
 @app.route('/shows')
-def shows(venue_id):
+def shows():
   # displays list of shows at /shows
   # TODO:Done replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
-  # shows = Show.query.all()
+     
+  data = []
 
-  # data = []
-  # for show in shows:
-  #   data.append({
-  #     "venue_id": show.venue_id,
-  #     "venue_name": Venue.query.filter_by(id=show.venue_id).first().name,
-  #     "artist_id": show.artist_id,
-  #     "artist_name": Artist.query.filter_by(id=show.artist_id).first().name,
-  #     "artist_image_link": Artist.query.filter_by(id=show.artist_id).first().image_link,
-  #     "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
-  #   })       
-  venue = Venue.query.first_or_404(venue_id)
+  venues = Venue.query.all()
 
-  past_shows = []
-  upcoming_shows = []
-
-  for show in venue.shows:
-      temp_show = {
-          'artist_id': show.artist_id,
-          'artist_name': show.artist.name,
-          'artist_image_link': show.artist.image_link,
-          'start_time': show.start_time.strftime("%m/%d/%Y, %H:%M")
-      }
-      if show.start_time <= datetime.now():
-        past_shows.append(temp_show)
-      else:
-        upcoming_shows.append(temp_show)
-
-  # object class to dict
-  data = vars(venue)
-
-  data['past_shows'] = past_shows
-  data['upcoming_shows'] = upcoming_shows
-  data['past_shows_count'] = len(past_shows)
-  data['upcoming_shows_count'] = len(upcoming_shows)
+  for venue in venues:
+    for show in venue.shows:
+      data.append({
+        "venue_id": show.venue_id,
+        "venue_name": show.venue.name,
+        "artist_id": show.artist_id,
+        "artist_name": show.artist.name,
+        "artist_image_link": show.artist.image_link,
+        "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
+    })    
   return render_template('pages/shows.html', shows=data)
 
 @app.route('/shows/create')
